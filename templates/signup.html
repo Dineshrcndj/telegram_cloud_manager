@@ -185,11 +185,15 @@
 
       <label for="confirm_password">Confirm Password</label>
       <input id="confirm_password" name="confirm_password" type="password" placeholder="Confirm Password" required>
+        <label for="bot_token">Telegram Bot Token</label>
+        <input id="bot_token" name="bot_token" type="text" placeholder="Enter your bot token" required>
+        <label for="chat_id">Chat ID</label>
+        <input id="chat_id" name="chat_id" type="text" placeholder="Enter your chat ID" required>
 
       <button type="submit">Create Account</button>
     </form>
     <div class="link">
-      Already have an account? <a href="/login">Login</a>
+      Already have an account? <a href="{{url_for('login')}}">Login</a>
     </div>
   </div>
 </body>
