@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram File Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #229ED9;
+            --bg: #F4F6F8;
+            --card: #ffffff;
+            --text: #333;
+            --success: #4CAF50;
+            --error: #f44336;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background-color: var(--primary);
+            color: #fff;
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: white;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px 30px;
+            background-color: var(--card);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: var(--primary);
+        }
+
+        form {
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="file"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1c90c7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            color: #fff;
+            min-width: 250px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: fadeOut 5s forwards;
+            animation-delay: 2s;
+        }
+
+        .toast-success { background-color: var(--success); }
+        .toast-error { background-color: var(--error); }
+
+        @keyframes fadeOut {
+            0%   { opacity: 1; }
+            80%  { opacity: 1; }
+            100% { opacity: 0; transform: translateX(100%); }
+        }
+
+        .center-btn {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .navbar-right {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            th, td, button {
+                font-size: 14px;
+            }
+        }
+        .delete-btn {
+    background-color: #f44336;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+    </style>
+</head>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="toast-container">
+            {% for category, message in messages %}
+                <div class="toast toast-{{ 'success' if category == 'success' else 'error' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<body>
+
+<div class="navbar">
+    <h2>Telegram File Manager</h2>
+    <div class="navbar-right">
+        <h3>Welcome {{ session['phone'] }}</h3>
+        <a href="{{ url_for('logout') }}"><button style="background-color: #ff5252;">Logout</button></a>
+    </div>
+</div>
+
+<div class="container">
+    <h1>📤 Upload Files to Telegram</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <label>Upload Files</label>
+        <input type="file" name="files" multiple required>
+        <select name="folder" style="margin-bottom: 16px;">
+            <option value="">Select Folder (optional)</option>
+            {% for folder in session['folders'] %}
+                <option value="{{ folder }}">{{ folder }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="foldername" placeholder="Enter new folder name (optional)" style="margin-bottom: 16px;">
+        <button type="submit">Upload</button>
+    </form>
+
+    <div class="center-btn">
+        <button id="toggle-filter">📁 Show Filter Section</button>
+    </div>
+
+    <div id="filter-section" style="display: none;">
+        <h3>📁 Filter by Folder</h3>
+        <form action="filterfolder" method="post">
+    <select name="foldervalue">
+        {% for folder in session['folders'] %}
+            <option value="{{ folder }}" {% if session['folderdata'] and folder == session['folderdata'][0][2] %}selected{% endif %}>
+                {{ folder }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
+
+        {% if session['folderdata'] %}
+            <p>🔍 Showing results for folder: <strong>{{ session['folderdata'][0][2] }}</strong></p>
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Filename</th><th>Uploaded</th><th>Download</th><th>Delete</th></tr>
+                </thead>
+                <tbody>
+                    {% for filedata in session['folderdata'] %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ filedata[4] }}</td>
+                        <td>{{ filedata[6] }}</td>
+                        <td><a href="https://api.telegram.org/file/bot{{ session['bot'] }}/{{ filedata[5] }}"><button>Download</button></a></td>
+                        <td style="text-align: center;">
+    <form method="POST" action="{{ url_for('delete_file', file_id=filedata[0]) }}" onsubmit="return confirm('⚠️ Are you sure you want to delete this file?');" style="margin: 0;">
+        <button type="submit" class="delete-btn">Delete</button>
+    </form>
+</td>
+
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    {% if file_responses %}
+    <div class="toast-container">
+        {% for filename, file_id, file_path, error in file_responses %}
+            {% if file_id %}
+                <div class="toast toast-success">
+                    ✅ {{ filename }} uploaded successfully.
+                    <br><a href="https://api.telegram.org/file/bot{{ session['bot'] }}/{{ file_path }}" style="color:#c8e6c9;">Download</a>
+                </div>
+            {% else %}
+                <div class="toast toast-error">
+                    ❌ Failed to upload {{ filename }}: {{ error }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="center-btn">
+        <button id="toggle-recent-files">📂 Show Recent Files</button>
+    </div>
+
+    <div id="recent-files" style="display: none;">
+        <h2>🕓 Recent Files</h2>
+        {% if recent %}
+        <table>
+            <thead>
+                <tr><th>#</th><th>Filename</th><th>Uploaded</th><th>Download</th><th>Delete</th></tr>
+            </thead>
+            <tbody>
+                {% for filedata in recent %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ filedata[4] }}</td>
+                    <td>{{ filedata[6] }}</td>
+                    <td><a href="https://api.telegram.org/file/bot{{ session['bot'] }}/{{ filedata[5] }}"><button>Download</button></a></td>
+                    <td style="text-align: center;">
+    <form method="POST" action="{{ url_for('delete_file', file_id=filedata[0]) }}" onsubmit="return confirm('⚠️ Are you sure you want to delete this file?');" style="margin: 0;">
+        <button type="submit" class="delete-btn">Delete</button>
+    </form>
+</td>
+
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.toast').forEach(toast => {
+        toast.addEventListener('animationend', () => toast.remove());
+    });
+
+    // FILTER SECTION TOGGLE WITH PERSISTENCE
+    const toggleFilterBtn = document.getElementById('toggle-filter');
+    const filterSection = document.getElementById('filter-section');
+    const filterVisible = localStorage.getItem('filterVisible') === 'true';
+
+    if (filterVisible) {
+        filterSection.style.display = 'block';
+        toggleFilterBtn.textContent = '📁 Hide Filter Section';
+    } else {
+        filterSection.style.display = 'none';
+        toggleFilterBtn.textContent = '📁 Show Filter Section';
+    }
+
+    toggleFilterBtn.addEventListener('click', () => {
+        const currentlyVisible = filterSection.style.display === 'block';
+        filterSection.style.display = currentlyVisible ? 'none' : 'block';
+        toggleFilterBtn.textContent = currentlyVisible ? '📁 Show Filter Section' : '📁 Hide Filter Section';
+        localStorage.setItem('filterVisible', !currentlyVisible);
+    });
+
+    // RECENT FILES TOGGLE WITH PERSISTENCE
+    const toggleRecentBtn = document.getElementById('toggle-recent-files');
+    const recentFiles = document.getElementById('recent-files');
+    const recentVisible = localStorage.getItem('recentVisible') === 'true';
+
+    if (recentVisible) {
+        recentFiles.style.display = 'block';
+        toggleRecentBtn.textContent = '📂 Hide Recent Files';
+    } else {
+        recentFiles.style.display = 'none';
+        toggleRecentBtn.textContent = '📂 Show Recent Files';
+    }
+
+    toggleRecentBtn.addEventListener('click', () => {
+        const currentlyVisible = recentFiles.style.display === 'block';
+        recentFiles.style.display = currentlyVisible ? 'none' : 'block';
+        toggleRecentBtn.textContent = currentlyVisible ? '📂 Show Recent Files' : '📂 Hide Recent Files';
+        localStorage.setItem('recentVisible', !currentlyVisible);
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Existing toggles here...
+
+    // Add confirmation before deleting
+    const deleteForms = document.querySelectorAll('.delete-form');
+    deleteForms.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            const confirmed = confirm("⚠️ Are you sure you want to delete this file?");
+            if (!confirmed) {
+                e.preventDefault(); // stop form from submitting
+            }
+        });
+    });
+});
+</script>
+
+
+</body>
+</html>

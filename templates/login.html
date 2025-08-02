@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Telegram Upload</title>
+  <style>
+    :root {
+      --primary: #00e5ff;
+      --primary-dark: #00bcd4;
+      --background-blur: rgba(0, 0, 0, 0.65);
+      --input-bg: rgba(255, 255, 255, 0.12);
+      --input-focus: rgba(0, 229, 255, 0.15);
+      --border-radius: 12px;
+      --transition: 0.3s cubic-bezier(.4,0,.2,1);
+      --shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      background: url('https://images.unsplash.com/photo-1615572359976-1fe39505a7c5?auto=format&fit=crop&w=1650&q=80') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-container {
+      background: var(--background-blur);
+      backdrop-filter: blur(12px);
+      padding: 48px 36px 36px 36px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 400px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 13px 14px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      background: var(--input-bg);
+      color: #fff;
+      outline: none;
+      transition: background var(--transition), box-shadow var(--transition);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    input:focus {
+      background: var(--input-focus);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    input::placeholder {
+      color: #b2ebf2;
+      opacity: 0.85;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: #000;
+      font-weight: bold;
+      font-size: 17px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0,229,255,0.10);
+    }
+
+    button:hover,
+    button:focus {
+      background: var(--primary-dark);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    .link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .link a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        margin: 18px;
+        padding: 28px 10px 22px 10px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>🔐 Login</h2>
+    <form method="post">
+      <input name="phone" type="text" placeholder="Enter Phone number" maxlength="10" minlength="10" required>
+      <input type="password" name="password" placeholder="Enter your password" required>
+      <button type="submit">Submit</button>
+    </form>
+    <div class="link">
+      Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a>
+    </div>
+  </div>
+</body>
+</html>
