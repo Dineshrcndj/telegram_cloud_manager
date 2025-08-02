@@ -56,6 +56,8 @@ def create_tables_if_not_exist():
 create_tables_if_not_exist()
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    if 'phone' in session:
+        return redirect(url_for('index'))
     if request.method == 'POST':
         phone = request.form['phone']
         password = request.form['password']

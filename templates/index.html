@@ -286,6 +286,20 @@
 
     <div id="recent-files" style="display: none;">
         <h2>🕓 Recent Files</h2>
+        <a href="{{url_for('index')}}"><button>Refresh</button></a>
+        {% if session['recent_files'] %}
+            <p>Showing last {{ session['recent_files_count'] }} files:</p>
+        {% else %}
+            <p>No recent files found.</p>
+        {% endif %}
+        {% set recent = session['recent_files'] if session['recent_files'] else None %}
+        {% if recent and recent|length == 0 %}
+            <p>No files found in the selected folder.</p>
+        {% endif %}
+        {% if recent and recent|length > 0 %}
+            <p>Showing last {{ recent|length }} files:</p>
+        {% endif %}
+        {% if recent and recent|length > 0 %}
         {% if recent %}
         <table>
             <thead>
