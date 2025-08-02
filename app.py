@@ -3,8 +3,9 @@ from flask_session import Session
 import requests
 from io import BytesIO
 import pymysql
+import os
 app = Flask(__name__)
-app.secret_key = 'madhu'
+app.secret_key = 'dinesh_telegram'
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
@@ -229,5 +230,8 @@ def filterfolder():
         conn.close()
     return redirect(url_for('index'))
 
-if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True)
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
